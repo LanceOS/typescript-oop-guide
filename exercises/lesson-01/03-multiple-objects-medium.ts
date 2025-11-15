@@ -57,7 +57,6 @@ console.log("Frank's starting balance:", account2.getBalance());
 // 400 + 350 = 750
 console.log("Steve deposits 350.", "New balance:", account1.deposit(350));
 
-console.log(
-    "Steve has transferred 100 to Frank:", account1.transfer(100, account2));
+console.log("Steve has transferred 100 to Frank:", account1.transfer(100, account2));
 console.log("Steve's new balance is:", account1.getBalance());
 console.log("Frank's new balance is:", account2.getBalance());
