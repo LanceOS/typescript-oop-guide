@@ -10,3 +10,22 @@
  */
 
 // Your code here
+
+
+class Person {
+    name: string;
+    age: number;
+    city: string;
+
+    constructor(name: string, age: number, city: string) {
+        this.name = name;
+        this.age = age;
+        this.city = city;
+    }
+}
+
+
+const person1 = new Person("Placeholder", 100, "Placeholder");
+
+
+console.log(person1)
