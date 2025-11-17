@@ -14,24 +14,40 @@
 
 class Book {
   constructor(
-    public isbn: string,
+    private readonly isbn: string,
     public readonly title: string,
     public readonly author: string,
-    public isAvailable: boolean = true
+    private isAvailable: boolean = true
   ) {};
+
+  public getIsbn() {
+    return this.isbn;
+  };
+
+  public setBookStatus(status: boolean) {
+    return this.isAvailable = status;
+  };
+
+  public getBookStatus() {
+    return this.isAvailable;
+  };
   
   public checkOut() {
-    if(!this.isAvailable) {
-      throw new Error("This book is not available!");
+    if(!this.getBookStatus()) {
+      return "This book is not available!";
     };
-    return this.isAvailable = false;
+    this.setBookStatus(false);
+    return true;
   };
 
   public returnBook() {
-    if(this.isAvailable) {
-      throw new Error("This book is not checked out!");
+    if(this.getBookStatus()) {
+      return "This book is not checked out!";
     };
-    return this.isAvailable = true;
+    
+
+    this.setBookStatus(true);
+    return true;
   };
 
   public getInfo() {
@@ -44,53 +60,20 @@ class Member {
   constructor(
     private readonly memberId: string,
     public name: string,
-    public borrowedBooks: Book[] = [],
-    public maxBooks: number = 3 
+    public maxBooks: number = 3,
+    public borrowedBooks: Map<string, Book> = new Map() 
   ) {};
 
-  public borrowBook(book: Book) {
-    if(this.borrowedBooks.length >= this.maxBooks) {
-      throw new Error("You have checked out the maximum amount of books!");
-    }
-    else if(!book.isAvailable) {
-      throw new Error("This book is not available!")
-    };
-
-    book.checkOut();
-    return this.borrowedBooks.push(book);
-  };
-
-  public returnBook(book: Book) {
-    if(this.borrowedBooks.length === 0) {
-      throw new Error("You do not have any books checked out!");
-    }
-    else if(book.isAvailable) {
-      throw new Error("This book has already been returned");
-    };
-
-    let tempArr = [];
-
-    book.returnBook();
-    
-    for(let i = 0; i < this.borrowedBooks.length; i++) {
-      if(this.borrowedBooks[i].title === book.title) {
-        continue;
-      }
-      else {
-        tempArr.push(this.borrowedBooks[i]); 
-      };
-    };
-
-
-    return this.borrowedBooks = tempArr;
-  };
+  public getMemberId() {
+    return this.memberId;
+  }
 
   public getBorrowedCount() {
-    return this.borrowedBooks.length;
+    return this.borrowedBooks.size;
   };
 
   public canBorrow() {
-    if(this.borrowedBooks.length <= this.maxBooks) {
+    if(this.borrowedBooks.size <= this.maxBooks) {
       return true;
     }
     else {
@@ -99,39 +82,73 @@ class Member {
   };
 
   public listBorrowedBooks() {
-    return this.borrowedBooks;
+    if(this.borrowedBooks.size > 0) {
+      return this.borrowedBooks;
+    }
+    else {
+      return "You have no borrowed books!"
+    };
   };
 };
 
-class Library() {
+class Library {
   constructor(
     public readonly name: string,
-    public books: Book[] = [],
-    public members: Members[] = []
+    public books: Map<string, Book> = new Map(), 
+    public members: Map<string, Member> = new Map()
   ) {};
 
   public addBook(book: Book) {
-    return this.books.push(book);
+    this.books.set(book.getIsbn(), book);
+    return true;
   };
 
   public addMember(member: Member) {
-    return this.members.push(member);
+    return this.members.set(member.getMemberId(), member);
   }
 
-  public findBook(isbn: string) {
-    for(let i = 0; i < this.books.length; i++) {
-      if(isbn === this.books[i].isbn) {
-        return this.books[i];
-      };
+  public borrowBook(member: Member, book: Book) {
+    if(member.borrowedBooks.size >= member.maxBooks) {
+      return "You have reached the maximum number of books allowed!";
+    }
+    else if(!book.getBookStatus()) {
+      return "This book is not available!";
     };
+
+    member.borrowedBooks.set(book.getIsbn(), book);
+    this.members.set(member.getMemberId(), member);
+    
+    book.checkOut();
+    this.books.set(book.getIsbn(), book);
+
+    return true;
+  };
+
+  public returnBook(member: Member, book: Book) {
+    if(member.borrowedBooks.size === 0) {
+      return "You have not checkout any any books!";
+    }
+    else if(book.getBookStatus()) {
+      return "this book is not checked out!";
+    };
+
+    member.borrowedBooks.delete(book.getIsbn());
+    book.returnBook();
+
+    this.members.set(member.getMemberId(), member);
+    this.books.set(book.getIsbn(), book);
+    
+    return true;
+  };
+
+  public findBook(isbn: string) {
+    const book = this.books.get(isbn);
+    return book;
   };
 
   public findMember(memberId: string) {
-    for(let i = 0; i < this.members.length; i++) {
-      if(memberId === this.members.memberId) {
-        return this.members[i];
-      }; 
-    };
+    const member = this.members.get(memberId);
+    return member;
   };
 
   public getAvailableBooks() {
@@ -139,26 +156,42 @@ class Library() {
   };
 
   public getTotalBooks() {
-    return this.books.length;
+    return this.books.size;
   };
 
   public getMemberCount() {
-    return this.members;
+    return this.members.size;
   };
 }
 
 
-const member = new Member("ME324", "Frank", [], 3);
+const member1 = new Member("ME324", "Frank", 3);
 const book1 = new Book("415J", "Typescript 101", "Dr. Smith")
 
-console.log(member.borrowBook(book1));
-console.log(member.listBorrowedBooks());
+const library = new Library("Town Library");
 
-console.log(member.getBorrowedCount());
-
-console.log(member.canBorrow());
+console.log("Adding new member", library.addMember(member1));
+console.log("Adding new book", library.addBook(book1));
 
 
+console.log("Member is checking out library book", library.borrowBook(member1, book1));
 
+
+console.log("Member info post checkout:",
+  "Member checkout out book:", member1.listBorrowedBooks(),
+  "Number of borrowed books:", member1.getBorrowedCount()
+);
+
+
+console.log("Is book available after return?", book1.getBookStatus())
+
+
+console.log("Member is returning book", library.returnBook(member1, book1));
+
+console.log("Member info post return:", "Member returned book:", member1.listBorrowedBooks(),
+  "Number of borrowed books:", member1.getBorrowedCount()
+);
+
+console.log("Is book available after return?", book1.getBookStatus());
 
 
