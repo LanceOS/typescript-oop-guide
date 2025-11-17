@@ -1,3 +1,4 @@
+
 # Lesson 01 Exercises: Classes and Objects
 
 Complete these exercises to practice creating classes, instantiating objects, and understanding the fundamentals of OOP.
