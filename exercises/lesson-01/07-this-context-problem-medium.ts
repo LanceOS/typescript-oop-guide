@@ -8,3 +8,35 @@
  */
 
 // Your code here
+
+class Timer {
+  constructor(public seconds: number = 0, public isRunning: boolean = false) {}
+
+  public tickArrow() {
+    if(!this.isRunning) {
+
+    }
+    const time: Date = new Date();
+    console.log(time.toLocaleString());
+  }
+
+  public start() {
+    this.tickArrow()  
+  }
+
+  public stop() {
+    this.isRunning = false;    
+  }
+
+  public getTime() {
+    return this.seconds;
+  }
+
+  public reset() {
+    this.seconds = 0;
+    return "Seconds has been set to zero."
+  }
+}
+
+
+
